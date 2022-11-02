@@ -19,7 +19,9 @@ class ProcessBank extends Component
     public $country_banks = [];
     public $account;
     public $account_holder;
-    public $amount;
+    public $amount; // in USD
+    public $currency;
+    public $amount_in_local;
 
     public function mount()
     {
@@ -38,6 +40,7 @@ class ProcessBank extends Component
         }
 
         $this->country_banks = $banks;
+        $this->currency = getCurrencyCode($this->country);
     }
 
     public function updatedBank()
@@ -49,6 +52,17 @@ class ProcessBank extends Component
     {
         $this->reset('account_holder');
         $this->confirmAccount();
+    }
+
+    public function updatedAmount()
+    {
+        $this->resetErrorBag('amount');
+
+        if ($this->amount > $this->balance) {
+            return $this->addError('amount', 'Amount cannot exceed balance');
+        }
+
+        $this->amount_in_local = Info::UsdToLocal($this->currency, $this->amount) ?? null;
     }
 
     public function confirmAccount()

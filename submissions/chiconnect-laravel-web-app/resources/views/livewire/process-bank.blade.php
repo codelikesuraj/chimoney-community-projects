@@ -65,7 +65,7 @@
                     <x-input-label for="account" :value="__('Account number')" />
                     <input wire:model.debounce.750ms="account" type="text" id="account" class="block mt-1 w-full"
                         name="account" value="{{ old('account') }}" required placeholder="0234566789" />
-                    <p class="my-1 font-bold text-sm text-green-900">{{ $account_holder }}</p>
+                    <p class="my-1 font-bold tracking-wide text-sm text-green-900">{{ $account_holder }}</p>
                     <p wire:loading wire:target="account" class="my-1 font-bold text-sm text-green-900">Verifying
                         account...</p>
                     <x-input-error wire:loading.remove wire:target="account" :messages="$errors->get('account')" class="mt-2" />
@@ -76,9 +76,12 @@
                 <!-- Amount in USD -->
                 <div class="mt-4">
                     <x-input-label for="amount" :value="__('Amount (in USD)')" />
-                    <input wire:model="amount" type="number" id="amount" class="block mt-1 w-full" name="amount"
-                        value="{{ old('amount') }}" max="{{ $balance }}" required />
+                    <input wire:model.debounce.150ms="amount" type="number" id="amount" class="block mt-1 w-full" min="1" name="amount" max="{{ $balance }}" required />
                     <x-input-error :messages="$errors->get('amount')" class="mt-2" />
+                    @if ($amount_in_local && $amount <= $balance)
+                        <p class="my-1 font-bold tracking-wide text-sm text-green-900">Receiver
+                            gets {{ $currency.' '.number_format($amount_in_local, 2) }}</p>
+                    @endif
                 </div>
             @endif
 
@@ -88,7 +91,7 @@
                     {{ __('Cancel') }}
                 </a>
 
-                @if ($balance && $country && $amount)
+                @if ($balance && $country && $amount <= $balance)
                     <x-primary-button wire:loading.attr="disabled" class="ml-4">
                         {{ __('Send') }}
                     </x-primary-button>

@@ -60,4 +60,22 @@ class Info
 
         return false;
     }
+
+    public static function UsdToLocal(string $destination_currency, string $amountInUsd)
+    {
+        $response =  Http::withHeaders([
+            'X-API-KEY' => config('chimoney.api_key'),
+            'accept' => 'application/json',
+            'content-type' => 'application/json',
+        ])->get('https://api.chimoney.io/v0.2/info/usd-amount-in-local', [
+            'destinationCurrency' => $destination_currency,
+            'amountInUSD' => (float)$amountInUsd
+        ]);
+
+        if ($response->status() == 200) {
+            return json_decode($response)->data->amountInDestinationCurrency;
+        }
+
+        return null;
+    }
 }
